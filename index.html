@@ -159,8 +159,7 @@
 </div>
 
 <script>
-const SHEET_ID = '14ws_L-9tZSGC07wESq6ejwvpT5npyzJn97VQXC3NmNQ';
-const SHEET_NAME = 'exploded_lyrics';
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2E_9vH77H-U5nURPY4SrmgewgPb8rpXgXv2cIeJ9ZuZVAIHqBWGWc5ClRDGPgIRyCDSaL4GQmC-91/pub?gid=1890510071&single=true&output=csv';
 
 let db = [];
 
@@ -168,7 +167,7 @@ async function loadSheet() {
   const status = document.getElementById('status');
   status.innerHTML = 'cargando<span class="loading-dot">_</span>';
   try {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+    const url = SHEET_URL;
     const res = await fetch(url);
     const text = await res.text();
     const rows = parseCSV(text);
