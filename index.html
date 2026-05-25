@@ -94,7 +94,7 @@
     color: #c8c4bc;
     font-style: normal;
     letter-spacing: 0.01em;
-    text-align: justify;
+    text-align: left;
   }
 
   .verse-line {
@@ -173,7 +173,7 @@
 </div>
 
 <script>
-const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2E_9vH77H-U5nURPY4SrmgewgPb8rpXgXv2cIeJ9ZuZVAIHqBWGWc5ClRDGPgIRyCDSaL4GQmC-91/pub?gid=1890510071&single=true&output=csv';
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsxgdlSURXWphaPdCoSnF4ci0MIUtjdaKtwWBfwDz6D5_2t8kqp05LBokM80pYeGeHDlQzD8kb0J0O/pub?gid=1890510071&single=true&output=csv';
 
 let db = [];
 
@@ -269,7 +269,7 @@ function search(word) {
     const label = formatSongId(r.song_id);
     const line = toSentenceCase(r.line);
     const next = matches[i + 1];
-    const ownPunct = /[!?]$/.test(r.line.trim());
+    const ownPunct = /[!?]$/.test(r.line.trim()) || /^[¡¿]/.test(r.line.trim());
     const nextOpens = next && /^[¡¿]/.test(next.line.trim());
     const sep = (ownPunct || nextOpens) ? ' ' : '<span class="dot">. </span>';
     return `<span class="verse-line" data-song="${label}">${highlightMatch(line, q)}<span class="tooltip">${escapeHtml(label)}</span></span>${sep}`;
