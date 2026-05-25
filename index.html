@@ -48,6 +48,11 @@
     letter-spacing: 0.04em;
   }
 
+  #search-input:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
   #cursor {
     position: absolute;
     left: 0;
@@ -88,19 +93,23 @@
     font-weight: 300;
     line-height: 2;
     color: #c8c4bc;
-    font-style: italic;
+    font-style: normal;
     letter-spacing: 0.01em;
+    text-align: justify;
   }
 
   .verse-line {
     display: inline;
     position: relative;
     cursor: default;
+    font-size: 15px;
+    font-weight: 300;
+    font-style: normal;
   }
 
   .verse-line::after {
     content: '. ';
-    color: #555;
+    color: #999;
     font-style: normal;
   }
 
@@ -147,6 +156,7 @@
       id="search-input"
       autocomplete="off"
       spellcheck="false"
+      disabled
     />
     <div id="cursor"></div>
   </div>
@@ -165,10 +175,10 @@ let db = [];
 
 async function loadSheet() {
   const status = document.getElementById('status');
+  const input = document.getElementById('search-input');
   status.innerHTML = 'cargando<span class="loading-dot">_</span>';
   try {
-    const url = SHEET_URL;
-    const res = await fetch(url);
+    const res = await fetch(SHEET_URL);
     const text = await res.text();
     const rows = parseCSV(text);
     db = rows.slice(1).filter(r => r[1] && r[1].trim()).map(r => ({
@@ -177,6 +187,8 @@ async function loadSheet() {
       line_number: (r[2] || '').trim()
     }));
     status.textContent = '';
+    input.disabled = false;
+    input.focus();
   } catch(e) {
     status.textContent = 'error · revisa el sheet id';
   }
@@ -207,9 +219,16 @@ function formatSongId(id) {
   return id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
+function toSentenceCase(str) {
+  const s = str.toLowerCase().trim();
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 function updateCursor() {
   const input = document.getElementById('search-input');
   const cursor = document.getElementById('cursor');
+  if (input.disabled) { cursor.classList.add('hidden'); return; }
+  cursor.classList.remove('hidden');
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   ctx.font = '300 22px IBM Plex Mono, monospace';
@@ -241,7 +260,8 @@ function search(word) {
   noResult.style.display = 'none';
   essay.innerHTML = matches.map(r => {
     const label = formatSongId(r.song_id);
-    return `<span class="verse-line" data-song="${label}">${escapeHtml(r.line)}<span class="tooltip">${escapeHtml(label)}</span></span>`;
+    const line = toSentenceCase(r.line);
+    return `<span class="verse-line" data-song="${label}">${escapeHtml(line)}<span class="tooltip">${escapeHtml(label)}</span></span>`;
   }).join(' ');
 
   document.querySelectorAll('.verse-line').forEach(el => {
@@ -270,7 +290,6 @@ input.addEventListener('keyup', updateCursor);
 input.addEventListener('click', updateCursor);
 input.addEventListener('focus', updateCursor);
 
-input.focus();
 loadSheet();
 </script>
 </body>
