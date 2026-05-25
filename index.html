@@ -106,13 +106,18 @@
     font-style: normal;
   }
 
-  .verse-line::after {
-    content: '. ';
-    color: #999;
-    font-style: normal;
-  }
-
   .verse-line:hover { color: #e8e4dc; }
+
+  .dot { color: #999; }
+
+  mark {
+    background: transparent;
+    color: #e8e4dc;
+    font-weight: 400;
+    text-decoration: underline;
+    text-decoration-color: #555;
+    text-underline-offset: 3px;
+  }
 
   .verse-line .tooltip {
     display: none;
@@ -220,7 +225,10 @@ function formatSongId(id) {
 
 function toSentenceCase(str) {
   const s = str.toLowerCase().trim();
-  return s.charAt(0).toUpperCase() + s.slice(1);
+  if ((s[0] === '¡' || s[0] === '¿') && s.length > 1) {
+    return s[0] + s[1].toUpperCase() + s.slice(2);
+  }
+  return s[0].toUpperCase() + s.slice(1);
 }
 
 function updateCursor() {
@@ -257,11 +265,15 @@ function search(word) {
   }
 
   noResult.style.display = 'none';
-  essay.innerHTML = matches.map(r => {
+  essay.innerHTML = matches.map((r, i) => {
     const label = formatSongId(r.song_id);
     const line = toSentenceCase(r.line);
-    return `<span class="verse-line" data-song="${label}">${escapeHtml(line)}<span class="tooltip">${escapeHtml(label)}</span></span>`;
-  }).join(' ');
+    const next = matches[i + 1];
+    const ownPunct = /[!?]$/.test(r.line.trim());
+    const nextOpens = next && /^[¡¿]/.test(next.line.trim());
+    const sep = (ownPunct || nextOpens) ? ' ' : '<span class="dot">. </span>';
+    return `<span class="verse-line" data-song="${label}">${highlightMatch(line, q)}<span class="tooltip">${escapeHtml(label)}</span></span>${sep}`;
+  }).join('');
 
   document.querySelectorAll('.verse-line').forEach(el => {
     el.addEventListener('mousemove', e => {
@@ -274,6 +286,12 @@ function search(word) {
 
 function escapeHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function highlightMatch(str, q) {
+  const escaped = escapeHtml(str);
+  const safeQ = escapeHtml(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return escaped.replace(new RegExp(safeQ, 'gi'), m => `<mark>${m}</mark>`);
 }
 
 const input = document.getElementById('search-input');
