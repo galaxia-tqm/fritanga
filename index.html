@@ -94,7 +94,7 @@
     color: #c8c4bc;
     font-style: normal;
     letter-spacing: 0.01em;
-    text-align: left;
+    text-align: justify;
   }
 
   .verse-line {
@@ -270,8 +270,7 @@ function search(word) {
     const line = toSentenceCase(r.line);
     const next = matches[i + 1];
     const ownPunct = /[!?]$/.test(r.line.trim()) || /^[¡¿]/.test(r.line.trim());
-    const nextOpens = next && /^[¡¿]/.test(next.line.trim());
-    const sep = (ownPunct || nextOpens) ? ' ' : '<span class="dot">. </span>';
+    const sep = ownPunct ? ' ' : '<span class="dot">. </span>';
     return `<span class="verse-line" data-song="${label}">${highlightMatch(line, q)}<span class="tooltip">${escapeHtml(label)}</span></span>${sep}`;
   }).join('');
 
